@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - queueNetwork
+  #   ports:
+  #     - 3000:3000
+  queue:
+    image: softwaremill/elasticmq-native
+    volumes:
+      - ./queue.conf:/opt/elasticmq.conf
+    networks:
+      - queueNetwork
+    ports:
+      - 9324:9324
+      - 9325:9325
+networks:
+  queueNetwork:
+    driver: bridge
