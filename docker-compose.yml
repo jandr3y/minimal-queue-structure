@@ -8,6 +8,39 @@ services:
   #     - queueNetwork
   #   ports:
   #     - 3000:3000
+  ## WORKER 1 ###
+  worker:
+    image: queue-structure-worker
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    depends:
+      - queue
+    environment:
+      - WORKER_ID=1
+      - QUEUE=email
+    networks:
+      - queueNetwork
+  ## WORKER 2 ###
+  worker2:
+    image: queue-structure-worker
+    depends:
+      - queue
+    environment:
+      - WORKER_ID=2
+      - QUEUE=email
+    networks:
+      - queueNetwork
+  ## WORKER 3 ###
+  worker3:
+    image: queue-structure-worker
+    depends:
+      - queue
+    environment:
+      - WORKER_ID=3
+      - QUEUE=payment
+    networks:
+      - queueNetwork
   queue:
     image: softwaremill/elasticmq-native
     volumes:
