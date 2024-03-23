@@ -6,7 +6,6 @@ const AWS = require('aws-sdk')
 const app = express()
 
 const AWS_CONFIG = {
-    endpoint: new AWS.Endpoint('http://localhost:9324'),
     accessKeyId: 'na',
     secretAccessKey: 'na',
     region: 'REGION'
