@@ -1,15 +1,15 @@
 # Minimal Queue Structure
 
-Uma estrutura **bem básica** de processamento de filas "SQS" local
+A **very basic** local queue processing structure using "SQS"
 
 ### Docker
 
-Para rodar com docker primeiro copie o arquivo de configuração de exemplo
+To run with Docker, first copy the example configuration file:
 ```
     cp .env.example .env
 ```
 
-Então levante os serviços, nesse comando é replicado 3x o serviço de worker
+Then bring up the services; in this command, the worker service is replicated 3 times:
 ```
     docker-compose up --scale worker=3
 ```
