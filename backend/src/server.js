@@ -1,40 +1,37 @@
 const express = require('express')
-const log = require('./log')
-require('dotenv').config()
-
 const AWS = require('aws-sdk')
-const app = express()
 
-const AWS_CONFIG = {
-    accessKeyId: 'na',
-    secretAccessKey: 'na',
-    region: 'REGION'
-}
+const app = express()
 
 app.use(express.json())
 
-const sqs = new AWS.SQS(AWS_CONFIG)
-
-const handleSqsMessageSend = (err, data) => {
-    if (err) throw err
-    log(`Item added [${data.MessageId}]`)
-}
+const sqs = new AWS.SQS({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+    region: process.env.AWS_REGION
+})
 
 // add item
 app.post('/add_to_queue/:queue', (request, response) => {
     const queue = request.params.queue
     const payload = request.body
 
-    log(`Adding item to queue (${queue}) - Payload: ${JSON.stringify(payload)}`)
+    console.log(`Adding item to queue (${queue}) - Payload: ${JSON.stringify(payload)}`)
 
-    sqs.sendMessage({ 
+    const message = {
         MessageBody: JSON.stringify(payload),
         QueueUrl: `${process.env.SQS_URL}/${queue}`
-    }, handleSqsMessageSend)
+    }
+
+    sqs.sendMessage(message, (err, data) => {
+        if (err) {
+            console.log(err)    
+        }
+
+        console.log(`Item added [${data.MessageId}]`)
+    })
 
     response.send('Item added to queue ' + queue)
 })
 
-app.listen(3000, () => {
-    console.log('-- Backend is running --')
-})
+app.listen(3000, () => console.log('-- Backend is running --'))

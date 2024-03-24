@@ -1,23 +1,21 @@
-require('dotenv').config()
-const AWS = require("aws-sdk");
-const c = require('sqs-consumer');
-const ClientSQS = require("@aws-sdk/client-sqs")
-const worker = process.argv[2]
-const queue = process.argv[3]
+const { Consumer } = require('sqs-consumer');
+const { SQSClient } = require("@aws-sdk/client-sqs")
 
-const handlers = require('./handlers')
+const queue = process.env.QUEUE_NAME
 
-const app = c.Consumer.create({
+const app = Consumer.create({
     queueUrl: `${process.env.SQS_URL}/${queue}`,
-    sqs: new ClientSQS.SQSClient({ 
+    sqs: new SQSClient({ 
         credentials: {
-            accessKeyId: 'na',
-            secretAccessKey: 'na',
+            accessKeyId: process.env.AWS_ACCESS_KEY,
+            secretAccessKey: process.env.AWS_SECRET_KEY,
         },
         endpoint: `${process.env.SQS_URL}`,
-        region: 'REGION'
+        region: process.env.AWS_REGION
     }),
-    handleMessage: handlers[queue]
+    handleMessage: async message => {
+        console.log(`Running ${queue} - ${JSON.stringify(message)}`)
+    }
 });
 
 app.start()

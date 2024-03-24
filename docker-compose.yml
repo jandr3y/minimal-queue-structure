@@ -1,46 +1,21 @@
 version: "3.8"
 services:
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   networks:
-  #     - queueNetwork
-  #   ports:
-  #     - 3000:3000
-  ## WORKER 1 ###
-  worker:
-    image: queue-structure-worker
+  backend:
     build:
-      context: ./worker
+      context: ./backend
       dockerfile: Dockerfile
-    depends:
-      - queue
     environment:
-      - WORKER_ID=1
-      - QUEUE=email
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - SQS_URL=${SQS_URL}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
     networks:
       - queueNetwork
-  ## WORKER 2 ###
-  worker2:
-    image: queue-structure-worker
-    depends:
+    depends_on:
       - queue
-    environment:
-      - WORKER_ID=2
-      - QUEUE=email
-    networks:
-      - queueNetwork
-  ## WORKER 3 ###
-  worker3:
-    image: queue-structure-worker
-    depends:
-      - queue
-    environment:
-      - WORKER_ID=3
-      - QUEUE=payment
-    networks:
-      - queueNetwork
+    ports:
+      - ${HTTP_PORT}:3000
+  ## QUEUE LOCAL (SQS INTERFACE) ##
   queue:
     image: softwaremill/elasticmq-native
     volumes:
@@ -50,6 +25,38 @@ services:
     ports:
       - 9324:9324
       - 9325:9325
+  ### WORKER ###
+  worker:
+    image: queue-structure-worker
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    depends_on:
+      - queue
+    environment:
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - SQS_URL=${SQS_URL}
+      - QUEUE_NAME=queue01
+    networks:
+      - queueNetwork
+  ## WORKER QUEUE02 ##
+  # worker2:
+  #   image: queue-structure-worker
+  #   build:
+  #     context: ./worker
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - queue
+  #   environment:
+  #     - AWS_REGION=${AWS_REGION}
+  #     - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+  #     - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+  #     - SQS_URL=${SQS_URL}
+  #     - QUEUE_NAME=queue02
+  #   networks:
+  #     - queueNetwork
 networks:
   queueNetwork:
     driver: bridge
